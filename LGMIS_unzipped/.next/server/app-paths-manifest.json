@@ -1,4 +1,5 @@
 {
-  "/dashboard/finance/page": "app/dashboard/finance/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/finance/page": "app/dashboard/finance/page.js"
 }
