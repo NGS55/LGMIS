@@ -1,0 +1,20 @@
+# Node.js dependencies
+LGMIS_unzipped/node_modules
+LGMIS_unzipped/node_modules/
+LGMIS_unzipped/node_modules/**
+
+# Next.js build output
+LGMIS_unzipped/.next
+LGMIS_unzipped/.next/
+
+# TypeScript incremental build info
+LGMIS_unzipped/tsconfig.tsbuildinfo
+
+# Logs and local environment files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env*
+
+# Misc generated artifacts
+*.log
