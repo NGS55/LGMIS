@@ -20,6 +20,7 @@ import {
   Assessment,
   CurrencyExchange,
   Book,
+  Assignment,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -34,10 +35,10 @@ const modules = [
   { name: 'Legal', icon: Gavel, path: '/dashboard/legal' },
   { name: 'Licensing', icon: Business, path: '/dashboard/licensing' },
   { name: 'Planning', icon: LocationCity, path: '/dashboard/planning' },
-  { name: 'Valuation Role', icon: Assessment, path: '/dashboard/valuation' },
+  { name: 'Public Health', icon: Assignment, path: '/dashboard/public-health' },
+  { name: 'Valuation Roll', icon: Assessment, path: '/dashboard/valuation' },
   { name: 'Property Rates', icon: CurrencyExchange, path: '/dashboard/property-rates' },
   { name: 'Reports', icon: Book, path: '/dashboard/reports' },
-  { name: 'Public Health', icon: Assignment, path: '/dashboard/public-health' },
 ];
 
 type ModuleNavigationProps = {
