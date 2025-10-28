@@ -2,13 +2,19 @@ import { FileAttachment, BaseEntity, GeoLocation } from './shared';
 
 export interface Plot extends BaseEntity {
   plotNumber: string;
+  provisionalPlotNumber?: string;
   location: GeoLocation;
   size: number;
   zoning: ZoningType;
   status: PlotStatus;
   owner?: string;
+  applicantId?: string;
+  area?: PlanningArea;
   gpsPoints: GpsPoint[];
+  rezoningRequests: RezoningRequest[];
   offerDetails?: PlotOffer;
+  attachments: FileAttachment[];
+  notes?: string;
 }
 
 export interface BuildingPlan extends BaseEntity {
@@ -40,6 +46,23 @@ export interface PlotOffer {
   status: 'pending' | 'accepted' | 'rejected' | 'expired';
   terms: string[];
   price: number;
+}
+
+export interface PlanningArea {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface RezoningRequest extends BaseEntity {
+  requestNumber: string;
+  currentZoning: ZoningType;
+  requestedZoning: ZoningType;
+  status: 'draft' | 'submitted' | 'approved' | 'rejected';
+  committeeDecision?: string;
+  meetingDate?: Date;
+  attachments: FileAttachment[];
+  notes?: string;
 }
 
 export interface ChecklistItem {

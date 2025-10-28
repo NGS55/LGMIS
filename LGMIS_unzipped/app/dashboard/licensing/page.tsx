@@ -16,6 +16,17 @@ import {
   Chip,
   Tab,
   Tabs,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+  TextField,
+  MenuItem,
+  InputAdornment,
+  Alert,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -25,7 +36,7 @@ import {
   LocalBar as LiquorIcon,
   Refresh as RenewIcon,
 } from '@mui/icons-material';
-import { useState } from 'react';
+import { ChangeEvent, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { License, LicenseType } from '@/types/licensing';
 
@@ -73,14 +84,109 @@ const mockLicenses: License[] = [
   }
 ];
 
-const licenseTypes: LicenseType[] = ['business', 'liquor', 'trading', 'special'];
+const DEFAULT_LICENSE_TYPES: LicenseType[] = ['business', 'liquor', 'trading', 'special'];
 
 export default function LicensingDashboard() {
   const [licenses] = useState<License[]>(mockLicenses);
   const [activeTab, setActiveTab] = useState<LicenseType>('business');
+  const [licenseTypes, setLicenseTypes] = useState<LicenseType[]>(DEFAULT_LICENSE_TYPES);
+  const [openForm, setOpenForm] = useState(false);
+  const [showTypeField, setShowTypeField] = useState(false);
+  const [selectedType, setSelectedType] = useState<LicenseType | ''>('business');
+  const [customType, setCustomType] = useState('');
+  const [formValues, setFormValues] = useState({
+    businessName: '',
+    tradingName: '',
+    registrationNumber: '',
+    contactPerson: '',
+    email: '',
+    phone: '',
+    validFrom: '',
+    validUntil: '',
+    initialFee: '',
+  });
+
+  const isCustomTypeValid = useMemo(() => {
+    if (!showTypeField) return true;
+    return customType.trim().length >= 3;
+  }, [showTypeField, customType]);
+
+  const canSubmit = useMemo(() => {
+    const baseFilled =
+      formValues.businessName.trim() &&
+      formValues.tradingName.trim() &&
+      formValues.registrationNumber.trim() &&
+      formValues.email.trim() &&
+      formValues.validFrom &&
+      formValues.validUntil &&
+      selectedType !== '';
+
+    if (!baseFilled) {
+      return false;
+    }
+
+    if (showTypeField && !isCustomTypeValid) {
+      return false;
+    }
+
+    if (showTypeField && !licenseTypes.includes(customType.trim().toLowerCase() as LicenseType)) {
+      return customType.trim().length >= 3;
+    }
+
+    return true;
+  }, [formValues, selectedType, showTypeField, customType, isCustomTypeValid, licenseTypes]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: LicenseType) => {
     setActiveTab(newValue);
+  };
+
+  const handleOpenForm = () => {
+    setOpenForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setOpenForm(false);
+    setShowTypeField(false);
+    setCustomType('');
+    setSelectedType('business');
+    setFormValues({
+      businessName: '',
+      tradingName: '',
+      registrationNumber: '',
+      contactPerson: '',
+      email: '',
+      phone: '',
+      validFrom: '',
+      validUntil: '',
+      initialFee: '',
+    });
+  };
+
+  const handleFormChange =
+    (field: keyof typeof formValues) =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setFormValues((prev) => ({ ...prev, [field]: event.target.value }));
+    };
+
+  const handleLicenseTypeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value as LicenseType | 'new';
+    if (value === 'new') {
+      setShowTypeField(true);
+      setSelectedType('');
+      return;
+    }
+    setShowTypeField(false);
+    setSelectedType(value);
+  };
+
+  const handleAddCustomType = () => {
+    const sanitized = customType.trim().toLowerCase() as LicenseType;
+    if (sanitized && !licenseTypes.includes(sanitized)) {
+      setLicenseTypes((prev) => [...prev, sanitized]);
+      setSelectedType(sanitized);
+      setShowTypeField(false);
+      setCustomType('');
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -114,7 +220,7 @@ export default function LicensingDashboard() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => {/* Handle new license */}}
+            onClick={handleOpenForm}
           >
             New License
           </Button>
@@ -239,6 +345,176 @@ export default function LicensingDashboard() {
           </Paper>
         </Grid>
       </Grid>
+
+      <Dialog open={openForm} onClose={handleCloseForm} maxWidth="md" fullWidth>
+        <DialogTitle>Register New License</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            <Stack spacing={1.5}>
+              <Typography variant="subtitle1">License Type</Typography>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <TextField
+                  select
+                  label="Select Type"
+                  value={showTypeField ? 'new' : selectedType}
+                  onChange={handleLicenseTypeChange}
+                  sx={{ minWidth: 220 }}
+                >
+                  {licenseTypes.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </MenuItem>
+                  ))}
+                  <MenuItem value="new">+ Add new license type</MenuItem>
+                </TextField>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={showTypeField}
+                      onChange={(_, checked) => setShowTypeField(checked)}
+                    />
+                  }
+                  label="Create custom type"
+                />
+              </Stack>
+              {showTypeField && (
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <TextField
+                    label="New License Type"
+                    value={customType}
+                    onChange={(event) => setCustomType(event.target.value)}
+                    helperText="Provide a unique type name (min 3 characters)."
+                  />
+                  <Button
+                    variant="outlined"
+                    onClick={handleAddCustomType}
+                    disabled={!isCustomTypeValid}
+                  >
+                    Add Type
+                  </Button>
+                </Stack>
+              )}
+              {showTypeField && !isCustomTypeValid && (
+                <Alert severity="warning" sx={{ maxWidth: 360 }}>
+                  Type name must be at least 3 characters long.
+                </Alert>
+              )}
+            </Stack>
+
+            <Stack spacing={2}>
+              <Typography variant="subtitle1">Business Details</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Registered Business Name"
+                    value={formValues.businessName}
+                    onChange={handleFormChange('businessName')}
+                    required
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Trading Name"
+                    value={formValues.tradingName}
+                    onChange={handleFormChange('tradingName')}
+                    required
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Registration Number"
+                    value={formValues.registrationNumber}
+                    onChange={handleFormChange('registrationNumber')}
+                    required
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Contact Person"
+                    value={formValues.contactPerson}
+                    onChange={handleFormChange('contactPerson')}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Email"
+                    type="email"
+                    value={formValues.email}
+                    onChange={handleFormChange('email')}
+                    required
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Phone Number"
+                    value={formValues.phone}
+                    onChange={handleFormChange('phone')}
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
+            </Stack>
+
+            <Stack spacing={2}>
+              <Typography variant="subtitle1">Validity and Fees</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    label="Valid From"
+                    type="date"
+                    value={formValues.validFrom}
+                    onChange={handleFormChange('validFrom')}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    label="Valid Until"
+                    type="date"
+                    value={formValues.validUntil}
+                    onChange={handleFormChange('validUntil')}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    label="Initial Fee"
+                    value={formValues.initialFee}
+                    onChange={handleFormChange('initialFee')}
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">ZMW</InputAdornment>,
+                      inputMode: 'decimal',
+                    }}
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
+            </Stack>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={handleCloseForm}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!canSubmit}
+            onClick={() => {
+              /* submit coming soon */
+              handleCloseForm();
+            }}
+          >
+            Create License
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

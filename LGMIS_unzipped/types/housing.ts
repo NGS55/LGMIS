@@ -1,17 +1,56 @@
-import { FileAttachment, GeoLocation, ApplicationStatus } from './shared';
+import { FileAttachment } from './shared';
+
+export type HousingApplicationStatus =
+  | 'draft'
+  | 'pending'
+  | 'inspection'
+  | 'settlementReview'
+  | 'approved'
+  | 'confirmed'
+  | 'rejected';
+
+export interface HouseholdMember {
+  id: string;
+  name: string;
+  age: number;
+  relationship: string;
+  employed: boolean;
+}
+
+export interface HouseholdRecord {
+  id: string;
+  headOfHousehold: string;
+  contactNumber: string;
+  members: HouseholdMember[];
+  totalIncome: number;
+}
+
+export interface SettlementRecord {
+  id: string;
+  settlementArea: string;
+  plotReference?: string;
+  coordinates?: { latitude: number; longitude: number };
+  accessToUtilities: {
+    water: boolean;
+    electricity: boolean;
+    sanitation: boolean;
+  };
+}
 
 export interface HousingApplication {
   id: string;
   applicationNumber: string;
   applicantName: string;
   propertyType: 'house' | 'apartment' | 'land';
-  status: ApplicationStatus;
+  status: HousingApplicationStatus;
   settlementArea: string;
   householdSize: number;
   monthlyIncome: number;
   applicationDate: Date;
   documents: FileAttachment[];
-  inspectionDetails?: InspectionDetails;
+  inspectionReports: InspectionDetails[];
+  settlementRecord: SettlementRecord;
+  householdRecord: HouseholdRecord;
   approvalDetails?: ApprovalDetails;
   createdAt: Date;
   updatedAt: Date;
@@ -33,4 +72,9 @@ export interface ApprovalDetails {
   comments: string;
   validUntil: Date;
   conditions?: string[];
+}
+
+export interface OwnershipApplicationHousing extends HousingApplication {
+  caseLocked: boolean;
+  reasonLocked?: string;
 }
