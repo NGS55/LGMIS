@@ -37,6 +37,7 @@ const modules = [
   { name: 'Valuation Role', icon: Assessment, path: '/dashboard/valuation' },
   { name: 'Property Rates', icon: CurrencyExchange, path: '/dashboard/property-rates' },
   { name: 'Reports', icon: Book, path: '/dashboard/reports' },
+  { name: 'Public Health', icon: Assignment, path: '/dashboard/public-health' },
 ];
 
 type ModuleNavigationProps = {
