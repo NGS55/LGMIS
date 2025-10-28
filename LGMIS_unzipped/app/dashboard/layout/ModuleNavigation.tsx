@@ -36,6 +36,7 @@ const modules = [
   { name: 'Planning', icon: LocationCity, path: '/dashboard/planning' },
   { name: 'Valuation Role', icon: Assessment, path: '/dashboard/valuation' },
   { name: 'Property Rates', icon: CurrencyExchange, path: '/dashboard/property-rates' },
+  { name: 'Reports', icon: Book, path: '/dashboard/reports' },
 ];
 
 type ModuleNavigationProps = {
